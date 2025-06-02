@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yayasan - Persetujuan Penggajian</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; margin: 0; background-color: #f0f2f5; color: #1c1e21; font-size: 14px; line-height: 1.5; }
+        .navbar { background-color: #545b62; /* Warna khas Yayasan */ padding: 12px 25px; color: white; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .navbar h1 { margin: 0; font-size: 1.6em; font-weight: 600;}
+        .navbar .nav-links a, .navbar button {
+            color: white; text-decoration: none; padding: 8px 15px; border-radius: 5px;
+            background-color: #6c757d; border: none; cursor: pointer; margin-left: 12px; font-size: 0.9em; font-weight: 500;
+            transition: background-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .navbar button#logoutButtonYayasanPayroll { background-color: #dc3545; }
+        .navbar .nav-links a:hover, .navbar button:hover { opacity: 0.9; box-shadow: 0 0 5px rgba(255,255,255,0.3); }
+
+        .container { padding: 25px; max-width: 1140px; margin: 25px auto; background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        h2 { color: #1c1e21; border-bottom: 1px solid #dee2e6; padding-bottom: 12px; margin-bottom: 25px; font-size: 1.9em; font-weight: 600;}
+        h3 { font-size: 1.4em; margin-top: 30px; margin-bottom: 18px; color: #343a40; font-weight: 500;}
+
+        .filters { display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 30px; padding: 20px; background-color: #f8f9fa; border: 1px solid #e9ecef; border-radius: 6px; align-items: flex-end; }
+        .filters .filter-group { display: flex; flex-direction: column; flex-grow: 1; min-width: 200px; }
+        .filters label { margin-bottom: 6px; font-size: 0.9em; color: #495057; font-weight: 500; }
+        .filters select {
+            padding: 10px 12px; border: 1px solid #ced4da; border-radius: 4px; font-size: 0.95em; box-sizing: border-box;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .filters select:focus { border-color: #80bdff; outline: 0; box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25); }
+        .filters button { padding: 10px 20px; font-size: 0.95em; font-weight: 500; background-color: #007bff; color:white; border:none; border-radius: 4px; cursor:pointer; }
+        .filters button:hover { background-color: #0069d9; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #e0e0e0; padding: 10px 12px; text-align: left; font-size: 0.9em; vertical-align: middle; }
+        th { background-color: #f1f3f5; font-weight: 500; color: #495057; }
+        td.actions { white-space: nowrap; width: 1%; }
+        .actions button { margin-right: 8px; padding: 7px 12px; font-size: 0.9em; border-radius: 4px; cursor: pointer; border: none; color: white; font-weight: 500; }
+        .actions button:last-child { margin-right: 0; }
+        .view-employees-btn { background-color: #17a2b8; }
+        .approve-payroll-btn { background-color: #28a745; }
+        .reject-payroll-btn { background-color: #dc3545; }
+        .view-employees-btn:hover { background-color: #138496; }
+        .approve-payroll-btn:hover { background-color: #218838; }
+        .reject-payroll-btn:hover { background-color: #c82333; }
+        .actions button:disabled { background-color: #adb5bd !important; color: #6c757d !important; cursor: not-allowed; }
+
+
+        .status-PENDING_APPROVAL { color: #ffc107; font-weight: bold; background-color: #fff3cd; padding: 5px 8px; border-radius: 4px;}
+        .status-APPROVED { color: #0f5132; font-weight: bold; background-color: #d1e7dd; padding: 5px 8px; border-radius: 4px;}
+        .status-REJECTED { color: #842029; font-weight: bold; background-color: #f8d7da; padding: 5px 8px; border-radius: 4px;}
+
+        .message { padding: 12px 15px; margin-bottom: 20px; border-radius: 4px; text-align: center; font-size: 0.95em; }
+        .success { background-color: #d1e7dd; color: #0f5132; border: 1px solid #badbcc; }
+        .error { background-color: #f8d7da; color: #842029; border: 1px solid #f5c2c7; }
+        .info { background-color: #cff4fc; color: #055160; border: 1px solid #b6effb; }
+
+        /* Modal Styles */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.6); animation: fadeInModal 0.3s; }
+        .modal-content { background-color: #fff; margin: 8% auto; padding: 25px 30px; border-radius: 8px; width: 90%; max-width: 600px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); animation: scaleUpModal 0.3s; position: relative; }
+        .close-btn { color: #aaa; position: absolute; top: 15px; right: 20px; font-size: 30px; font-weight: bold; line-height: 1; }
+        .close-btn:hover, .close-btn:focus { color: #333; text-decoration: none; cursor: pointer; }
+        .modal-content h3 { margin-top: 0; padding-bottom: 15px; border-bottom: 1px solid #eee; font-size: 1.5em; font-weight: 500; color: #333;}
+        .modal-content .form-group { margin-bottom: 18px; }
+        .modal-content label { display: block; margin-bottom: 6px; font-weight: 500; font-size: 0.9em; color: #495057; }
+        .modal-content textarea {
+            width: calc(100% - 24px); padding: 10px 12px; border: 1px solid #ced4da;
+            border-radius: 4px; font-size: 1em; box-sizing: border-box; min-height: 80px; resize: vertical;
+        }
+        .modal-content textarea:focus { border-color: #80bdff; outline: 0; box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25); }
+        .modal-content button[type="submit"] {
+            background-color: #dc3545; color: white; padding: 10px 20px; border: none;
+            border-radius: 5px; cursor: pointer; margin-top: 20px; font-size: 1em; float: right; font-weight: 500;
+            transition: background-color 0.2s ease;
+        }
+        .modal-content button[type="submit"]:hover { background-color: #c82333; }
+        .modal-content button[type="submit"]:disabled { background-color: #f1b0b7; cursor: not-allowed; }
+        .modal-footer-message { margin-top: 60px; clear: both; }
+        #employeeListInModal ul { list-style-type: decimal; padding-left: 20px; max-height: 350px; overflow-y: auto; background-color: #f8f9fa; border: 1px solid #e9ecef; padding: 15px; border-radius: 4px;}
+        #employeeListInModal li { padding: 5px 0; font-size: 0.95em; }
+        @keyframes fadeInModal { from {opacity: 0} to {opacity: 1} }
+        @keyframes scaleUpModal { from {transform: translateY(-30px) scale(0.98); opacity: 0;} to {transform: translateY(0) scale(1); opacity: 1;} }
+
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h1>Panel Yayasan</h1>
+        <div class="nav-links">
+            <span id="yayasanPayrollInfo" style="margin-right: 20px; font-size: 0.9em;"></span>
+            <a href="yayasan-leave-requests.html" title="Persetujuan Izin Karyawan">Persetujuan Izin</a>
+            <a href="dashboard.html" title="Kembali ke Dashboard">Dashboard</a>
+            <button id="logoutButtonYayasanPayroll">Logout</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>Persetujuan Proses Penggajian</h2>
+        <div id="yayasanPayrollMessageArea" class="message" style="display: none;"></div>
+
+        <div class="filters">
+            <div class="filter-group">
+                <label for="filterPayrollStatus">Filter Status Payroll:</label>
+                <select id="filterPayrollStatus">
+                    <option value="PENDING_APPROVAL">Menunggu Persetujuan</option>
+                    <option value="APPROVED">Disetujui</option>
+                    <option value="REJECTED">Ditolak</option>
+                    <option value="">Semua Status</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <button id="applyPayrollFilterBtn">Tampilkan</button>
+            </div>
+        </div>
+
+        <div class="list-container">
+            <h3>Daftar Proses Penggajian</h3>
+            <div style="overflow-x:auto;">
+                <table id="yayasanPayrollRunsTable">
+                    <thead>
+                        <tr>
+                            <th>ID Run</th>
+                            <th>Periode</th>
+                            <th>Tgl. Eksekusi Admin</th>
+                            <th>Dieksekusi Oleh</th>
+                            <th>Status</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="yayasanPayrollRunsTableBody">
+                        <tr><td colspan="6" style="text-align:center; padding:20px;">Memuat data payroll run...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="viewEmployeesModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" id="closeViewEmployeesModalBtn" title="Tutup">&times;</span>
+            <h3 id="viewEmployeesModalTitle">Karyawan dalam Payroll Run</h3>
+            <div id="employeeListInModal">
+                <p>Memuat daftar karyawan...</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="rejectPayrollRunModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" id="closeRejectPayrollRunModalBtn" title="Tutup">&times;</span>
+            <h3>Tolak Proses Penggajian</h3>
+            <form id="rejectPayrollRunForm">
+                <input type="hidden" id="rejectPayrollRunIdInput" name="runId">
+                <p>Anda akan menolak Payroll Run ID: <strong id="rejectPayrollRunIdDisplay"></strong>.</p>
+                <div class="form-group">
+                    <label for="payrollRejectionReason">Alasan Penolakan (Wajib Diisi):</label>
+                    <textarea id="payrollRejectionReason" name="rejectionReason" rows="4" required placeholder="Berikan alasan penolakan yang jelas..."></textarea>
+                </div>
+                <button type="submit" id="rejectPayrollRunSubmitBtn">Tolak Proses Ini</button>
+            </form>
+            <div id="rejectPayrollRunModalMessageArea" class="message modal-footer-message" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script src="auth_utils.js"></script>
+    <script src="yayasan-payroll-approval.js"></script>
+</body>
+</html>

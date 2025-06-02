@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Manajemen Pengguna</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; margin: 0; background-color: #f0f2f5; color: #1c1e21; font-size: 14px; line-height: 1.5; }
+        .navbar { background-color: #343a40; padding: 12px 25px; color: white; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .navbar h1 { margin: 0; font-size: 1.6em; font-weight: 600;}
+        .navbar .nav-links { display: flex; align-items: center; }
+        .navbar .nav-links a, .navbar .nav-links button { /* Tombol logout juga di .nav-links */
+            color: white;
+            text-decoration: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            background-color: #007bff;
+            border: none;
+            cursor: pointer;
+            margin-left: 10px;
+            font-size: 0.9em;
+            font-weight: 500;
+            transition: background-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .navbar button#logoutButtonAdmin { background-color: #dc3545; }
+        .navbar .nav-links a:hover, .navbar button:hover { opacity: 0.9; box-shadow: 0 0 5px rgba(255,255,255,0.3); }
+
+        .container { padding: 25px; max-width: 1200px; margin: 25px auto; background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        h2 { color: #1c1e21; border-bottom: 1px solid #dee2e6; padding-bottom: 12px; margin-bottom: 25px; font-size: 1.9em; font-weight: 600;}
+        h3 { font-size: 1.4em; margin-top: 30px; margin-bottom: 18px; color: #343a40; font-weight: 500;}
+
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #e0e0e0; padding: 10px 12px; text-align: left; font-size: 0.95em; vertical-align: middle; }
+        th { background-color: #f1f3f5; font-weight: 500; color: #495057; }
+        td.actions { white-space: nowrap; width: 1%; }
+        .actions button {
+            margin-right: 6px;
+            padding: 6px 10px;
+            font-size: 0.88em;
+            border-radius: 4px;
+            cursor: pointer;
+            border: none;
+            color: white;
+            margin-bottom: 5px; /* Jarak jika tombol wrap */
+            display: inline-block; /* Memastikan margin-bottom bekerja */
+            min-width: 80px; /* Lebar minimum tombol */
+            text-align: center;
+        }
+        .actions button:last-child { margin-right: 0; }
+        .actions button:disabled { background-color: #adb5bd !important; color: #6c757d !important; cursor: not-allowed; }
+
+        .edit-btn { background-color: #ffc107; color: #212529 !important; }
+        .delete-btn { background-color: #dc3545; }
+        .reset-password-btn { background-color: #17a2b8; }
+        .manage-allowance-btn { background-color: #28a745; }
+        .manage-deduction-btn { background-color: #6f42c1; }
+        .manage-allowance-btn:hover { background-color: #218838; }
+        .manage-deduction-btn:hover { background-color: #5a32a3; }
+        .edit-btn:hover { background-color: #e0a800; }
+        .delete-btn:hover { background-color: #c82333; }
+        .reset-password-btn:hover { background-color: #138496; }
+
+
+        .add-user-btn {
+            background-color: #007bff; color: white; padding: 10px 18px; border: none;
+            border-radius: 5px; cursor: pointer; font-size: 1em; margin-bottom: 25px; font-weight: 500;
+            transition: background-color 0.2s ease;
+        }
+        .add-user-btn:hover { background-color: #0069d9; }
+
+        .message { padding: 12px 15px; margin-bottom: 20px; border-radius: 4px; text-align: center; font-size: 0.95em; }
+        .success { background-color: #d1e7dd; color: #0f5132; border: 1px solid #badbcc; }
+        .error { background-color: #f8d7da; color: #842029; border: 1px solid #f5c2c7; }
+        .info { background-color: #cff4fc; color: #055160; border: 1px solid #b6effb; }
+
+        /* Modal Styles (konsisten dengan halaman lain) */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.6); animation: fadeInModal 0.3s; }
+        .modal-content { background-color: #fff; margin: 8% auto; padding: 25px 30px; border-radius: 8px; width: 90%; max-width: 550px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); animation: scaleUpModal 0.3s; position: relative;}
+        .close-btn { color: #aaa; position: absolute; top: 15px; right: 20px; font-size: 30px; font-weight: bold; line-height: 1;}
+        .close-btn:hover, .close-btn:focus { color: #333; text-decoration: none; cursor: pointer; }
+        .modal-content h3 { margin-top: 0; padding-bottom: 15px; border-bottom: 1px solid #eee; font-size: 1.5em; font-weight: 500; color: #333;}
+        .modal-content .form-group { margin-bottom: 18px; }
+        .modal-content label { display: block; margin-bottom: 6px; font-weight: 500; font-size: 0.9em; color: #495057; }
+        .modal-content input[type="text"],
+        .modal-content input[type="email"],
+        .modal-content input[type="password"],
+        .modal-content input[type="number"],
+        .modal-content select {
+            width: calc(100% - 24px);
+            padding: 10px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 1em;
+            box-sizing: border-box;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .modal-content input:focus, .modal-content select:focus { border-color: #80bdff; outline: 0; box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25); }
+        .modal-content small { display: block; font-size: 0.85em; color: #6c757d; margin-top: 5px; }
+        .modal-content button[type="submit"] {
+            background-color: #28a745; color: white; padding: 10px 20px; border: none;
+            border-radius: 5px; cursor: pointer; margin-top: 20px; font-size: 1em; float: right; font-weight: 500;
+            transition: background-color 0.2s ease;
+        }
+        .modal-content button[type="submit"]:hover { background-color: #218838; }
+        .modal-content button[type="submit"]:disabled { background-color: #a3d9b3; cursor: not-allowed; }
+        .modal-footer-message { margin-top: 60px; /* Beri ruang setelah tombol submit */ clear: both; }
+
+        @keyframes fadeInModal { from {opacity: 0} to {opacity: 1} }
+        @keyframes scaleUpModal { from {transform: translateY(-30px) scale(0.98); opacity: 0;} to {transform: translateY(0) scale(1); opacity: 1;} }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h1>Admin Panel</h1>
+        <div class="nav-links">
+            <span id="adminInfo" style="margin-right: 20px; font-size: 0.9em;"></span>
+            <a href="dashboard.html" title="Kembali ke Dashboard Pengguna">Dashboard User</a>
+            <a href="settings.html" title="Pengaturan Absensi Global">Pengaturan Absensi</a>
+            <a href="allowance-types.html" title="Manajemen Jenis Tunjangan">Jenis Tunjangan</a>
+            <a href="deduction-types.html" title="Manajemen Jenis Potongan">Jenis Potongan</a>
+            <a href="admin-attendances.html" title="Manajemen Data Absensi">Data Absensi</a>
+            <a href="admin-payroll-runs.html" title="Manajemen Proses Penggajian">Penggajian</a>
+            <a href="admin-monthly-report.html" title="Laporan Absensi Bulanan">Laporan Bulanan</a>
+            <button id="logoutButtonAdmin">Logout</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>Manajemen Pengguna</h2>
+        <div id="adminMessageArea" class="message" style="display: none;"></div>
+        <button id="showAddUserModalBtn" class="add-user-btn">+ Tambah Pengguna Baru</button>
+
+        <div class="user-list-container">
+            <h3>Daftar Pengguna Sistem</h3>
+            <div style="overflow-x:auto;"> <table id="usersTable">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Nama</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Gaji Pokok</th>
+                            <th style="width: 250px;">Aksi</th> </tr>
+                    </thead>
+                    <tbody id="usersTableBody">
+                        <tr><td colspan="6" style="text-align:center; padding: 20px;">Memuat data pengguna...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="userModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" id="closeUserModalBtn" title="Tutup">&times;</span>
+            <h3 id="userModalTitle">Tambah Pengguna</h3>
+            <form id="userForm">
+                <input type="hidden" id="userId" name="userId">
+                <div class="form-group">
+                    <label for="name">Nama Lengkap:</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group" id="passwordFieldContainer">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" minlength="6" autocomplete="new-password">
+                    <small>Wajib diisi untuk pengguna baru (min. 6 karakter). Kosongkan jika tidak ingin mengubah password saat edit.</small>
+                </div>
+                <div class="form-group">
+                    <label for="role">Role:</label>
+                    <select id="role" name="role" required>
+                        <option value="EMPLOYEE">EMPLOYEE</option>
+                        <option value="YAYASAN">YAYASAN</option>
+                        <option value="REKTOR">REKTOR</option>
+                        <option value="PR1">PR1</option>
+                        <option value="PR2">PR2</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="baseSalary">Gaji Pokok (Rp):</label>
+                    <input type="number" id="baseSalary" name="baseSalary" placeholder="Contoh: 3000000" min="0" step="any">
+                    <small>Angka saja, tanpa titik atau koma. Kosongkan jika tidak ada.</small>
+                </div>
+                <button type="submit" id="userFormSubmitBtn">Simpan</button>
+            </form>
+            <div id="userModalMessageArea" class="message modal-footer-message" style="display: none;"></div>
+        </div>
+    </div>
+
+    <div id="resetPasswordModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" id="closeResetPasswordModalBtn" title="Tutup">&times;</span>
+            <h3>Reset Password untuk <span id="resetPasswordUserName" style="font-weight:normal;"></span></h3>
+            <form id="resetPasswordForm">
+                <input type="hidden" id="resetPasswordUserId" name="userId">
+                <div class="form-group">
+                    <label for="newPassword">Password Baru:</label>
+                    <input type="password" id="newPassword" name="newPassword" required minlength="6" autocomplete="new-password">
+                    <small>Minimal 6 karakter.</small>
+                </div>
+                <button type="submit" id="resetPasswordSubmitBtn">Reset Password</button>
+            </form>
+            <div id="resetPasswordModalMessageArea" class="message modal-footer-message" style="display: none;"></div>
+        </div>
+    </div>
+
+    <div id="manageUserAllowancesModal" class="modal">
+        <div class="modal-content" style="max-width: 700px;">
+            <span class="close-btn" id="closeManageUserAllowancesModalBtn" title="Tutup">&times;</span>
+            <h3 id="manageUserAllowancesModalTitle">Kelola Tunjangan untuk Pengguna: </h3>
+            <div id="userAllowancesMessageArea" class="message" style="display: none;"></div>
+
+            <h4>Tunjangan Saat Ini:</h4>
+            <table id="currentUserAllowancesTable" class="data-table" style="margin-bottom: 20px;">
+                <thead>
+                    <tr>
+                        <th>Jenis Tunjangan</th>
+                        <th>Jumlah (Rp)</th>
+                        <th style="width: 220px;">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="currentUserAllowancesTableBody">
+                    </tbody>
+            </table>
+            <hr style="margin: 20px 0;">
+
+            <h4>Tambah Tunjangan Baru:</h4>
+            <form id="addUserAllowanceForm">
+                <input type="hidden" id="addUserAllowanceUserId" name="userId">
+                <div class="form-group">
+                    <label for="selectAllowanceType">Pilih Jenis Tunjangan:</label>
+                    <select id="selectAllowanceType" name="allowanceTypeId" required>
+                        <option value="">-- Pilih Jenis --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="userAllowanceAmount">Jumlah Tunjangan (Rp):</label>
+                    <input type="number" id="userAllowanceAmount" name="amount" required min="0" step="any" placeholder="Contoh: 500000">
+                </div>
+                <button type="submit" id="addUserAllowanceSubmitBtn">Tambahkan Tunjangan</button>
+            </form>
+            <div id="userAllowanceModalMessageArea" class="message modal-footer-message" style="display: none;"></div>
+        </div>
+    </div>
+
+
+    <div id="manageUserDeductionsModal" class="modal">
+        <div class="modal-content" style="max-width: 750px;">
+            <span class="close-btn" id="closeManageUserDeductionsModalBtn" title="Tutup">&times;</span>
+            <h3 id="manageUserDeductionsModalTitle">Kelola Potongan untuk Pengguna: </h3>
+            <div id="userDeductionsMessageArea" class="message" style="display: none;"></div>
+
+            <h4>Potongan Saat Ini:</h4>
+            <table id="currentUserDeductionsTable" class="data-table" style="margin-bottom: 20px;">
+                <thead>
+                    <tr>
+                        <th>Jenis Potongan</th>
+                        <th>Tipe Kalkulasi</th>
+                        <th>Jumlah/Persen Ditetapkan</th>
+                        <th style="width: 220px;">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="currentUserDeductionsTableBody">
+                    </tbody>
+            </table>
+            <hr style="margin: 20px 0;">
+
+            <h4>Tambah Potongan Baru untuk Pengguna:</h4>
+            <form id="addUserDeductionForm">
+                <input type="hidden" id="addUserDeductionUserId" name="userId">
+                <div class="form-group">
+                    <label for="selectDeductionType">Pilih Jenis Potongan:</label>
+                    <select id="selectDeductionType" name="deductionTypeId" required>
+                        <option value="">-- Pilih Jenis --</option>
+                    </select>
+                </div>
+                <div id="userDeductionAmountContainer" class="form-group conditional-input" style="display:none;">
+                    <label for="userDeductionAmount">Jumlah Potongan Ditetapkan (Rp):</label>
+                    <input type="number" id="userDeductionAmount" name="assignedAmount" min="0" step="any" placeholder="Contoh: 25000">
+                </div>
+                <div id="userDeductionPercentageContainer" class="form-group conditional-input" style="display:none;">
+                    <label for="userDeductionPercentage">Persentase Potongan Ditetapkan (%):</label>
+                    <input type="number" id="userDeductionPercentage" name="assignedPercentage" min="0" max="100" step="any" placeholder="Contoh: 2.5 (untuk 2.5%)">
+                </div>
+                <button type="submit" id="addUserDeductionSubmitBtn">Tambahkan Potongan</button>
+            </form>
+             <div id="userDeductionModalMessageArea" class="message modal-footer-message" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script src="auth_utils.js"></script>
+    <script src="admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yayasan - Persetujuan Izin</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; background-color: #f8f9fa; color: #333; font-size: 14px; }
+        .navbar { background-color: #545b62; /* Warna berbeda untuk Yayasan */ padding: 10px 20px; color: white; display: flex; justify-content: space-between; align-items: center; }
+        .navbar h1 { margin: 0; font-size: 1.5em; }
+        .navbar .nav-links a, .navbar button {
+            color: white; text-decoration: none; padding: 8px 12px; border-radius: 4px;
+            background-color: #6c757d; border: none; cursor: pointer; margin-left: 10px; font-size: 0.9em;
+        }
+        .navbar button#logoutButtonYayasanLeave { background-color: #dc3545; }
+        .navbar .nav-links a:hover, .navbar button:hover { opacity: 0.85; }
+
+        .container { padding: 20px; max-width: 1200px; margin: 20px auto; background-color: white; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h2 { color: #333; border-bottom: 2px solid #545b62; padding-bottom: 10px; margin-bottom: 20px; font-size: 1.8em;}
+        h3 { font-size: 1.3em; margin-top: 25px; margin-bottom: 15px; color: #495057;}
+
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #dee2e6; padding: 8px 10px; text-align: left; font-size: 0.9em; vertical-align: middle; }
+        th { background-color: #e9ecef; font-weight: bold; }
+        td.actions { white-space: nowrap; width: 1%; }
+        .actions button { margin-right: 6px; padding: 6px 10px; font-size: 0.88em; border-radius: 4px; cursor: pointer; border: none; color: white; }
+        .approve-btn { background-color: #28a745; }
+        .reject-btn { background-color: #dc3545; }
+        .view-attachment-btn { background-color: #007bff; font-size:0.8em; padding: 4px 8px;}
+
+
+        .message { padding: 12px 15px; margin-bottom: 20px; border-radius: 4px; text-align: center; font-size: 0.95em; }
+        .success { background-color: #d1e7dd; color: #0f5132; border: 1px solid #badbcc; }
+        .error { background-color: #f8d7da; color: #842029; border: 1px solid #f5c2c7; }
+        .info { background-color: #cff4fc; color: #055160; border: 1px solid #b6effb; }
+
+        /* Modal Styles (konsisten) */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.6); animation: fadeIn 0.3s ease-out; }
+        .modal-content { background-color: #fefefe; margin: 8% auto; padding: 25px 30px; border: 1px solid #888; width: 90%; max-width: 500px; border-radius: 8px; position: relative; box-shadow: 0 5px 15px rgba(0,0,0,0.3); animation: slideIn 0.3s ease-out; }
+        .close-btn { color: #777; float: right; font-size: 30px; font-weight: bold; position: absolute; top: 10px; right: 20px; }
+        .close-btn:hover, .close-btn:focus { color: #333; text-decoration: none; cursor: pointer; }
+        .modal-content h3 { margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 15px; font-size: 1.4em; color: #343a40;}
+        .modal-content .form-group { margin-bottom: 15px; }
+        .modal-content label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.9em; color: #495057; }
+        .modal-content textarea {
+            width: calc(100% - 24px); padding: 10px 12px; border: 1px solid #ced4da; border-radius: 4px; font-size: 1em; box-sizing: border-box; min-height: 80px;
+        }
+        .modal-content textarea:focus { border-color: #80bdff; outline: 0; box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25); }
+        .modal-content button[type="submit"] { background-color: #dc3545; /* Tombol submit di modal reject berwarna merah */ color: white; padding: 10px 18px; border: none; border-radius: 4px; cursor: pointer; margin-top: 20px; font-size: 1em; float: right;}
+        .modal-content button[type="submit"]:hover { background-color: #c82333; }
+        .modal-content button[type="submit"]:disabled { background-color: #f1b0b7; cursor: not-allowed; }
+        .modal-footer-message { margin-top: 50px; }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h1>Panel Yayasan</h1>
+        <div>
+            <span id="yayasanLeaveInfo" style="margin-right: 20px; font-size: 0.9em;"></span>
+            <a href="yayasan-payroll-runs.html" title="Persetujuan Penggajian">Persetujuan Gaji</a>
+            <button id="logoutButtonYayasanLeave">Logout</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>Manajemen Pengajuan Izin Karyawan</h2>
+        <div id="yayasanLeaveMessageArea" class="message" style="display: none;"></div>
+
+        <div class="list-container">
+            <h3>Daftar Pengajuan Izin (Menunggu Persetujuan)</h3>
+            <div style="overflow-x:auto;">
+                <table id="pendingLeaveRequestsTable">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Tgl. Pengajuan</th>
+                            <th>Nama Karyawan</th>
+                            <th>Email</th>
+                            <th>Jenis Izin</th>
+                            <th>Dari Tanggal</th>
+                            <th>Sampai Tanggal</th>
+                            <th>Alasan</th>
+                            <th>Lampiran</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pendingLeaveRequestsTableBody">
+                        <tr><td colspan="10" style="text-align:center; padding: 20px;">Memuat data pengajuan izin...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="rejectLeaveModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" id="closeRejectLeaveModalBtn" title="Tutup">&times;</span>
+            <h3 id="rejectLeaveModalTitle">Tolak Pengajuan Izin</h3>
+            <form id="rejectLeaveForm">
+                <input type="hidden" id="rejectLeaveRequestId" name="leaveRequestId">
+                <p>Anda akan menolak pengajuan izin untuk: <strong id="rejectLeaveUserName"></strong>.</p>
+                <div class="form-group">
+                    <label for="rejectionReason">Alasan Penolakan (Wajib Diisi):</label>
+                    <textarea id="rejectionReason" name="rejectionReason" rows="3" required></textarea>
+                </div>
+                <button type="submit" id="rejectLeaveSubmitBtn">Tolak Pengajuan</button>
+            </form>
+            <div id="rejectLeaveModalMessageArea" class="message modal-footer-message" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script src="auth_utils.js"></script> <script src="yayasan-leave-requests.js"></script>
+</body>
+</html>

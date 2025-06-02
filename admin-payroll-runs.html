@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Proses Penggajian</title>
+    <style>
+        /* Salin CSS dasar dari halaman admin lain (navbar, container, table, message, modal) */
+        body { font-family: Arial, sans-serif; margin: 0; background-color: #f8f9fa; color: #333; font-size: 14px; }
+        .navbar { background-color: #343a40; padding: 10px 20px; color: white; display: flex; justify-content: space-between; align-items: center; }
+        .navbar h1 { margin: 0; font-size: 1.5em; }
+        .navbar .nav-links a, .navbar button {
+            color: white; text-decoration: none; padding: 8px 12px; border-radius: 4px;
+            background-color: #007bff; border: none; cursor: pointer; margin-left: 10px; font-size: 0.9em;
+        }
+        .navbar button#logoutButtonAdminPayroll { background-color: #dc3545; }
+        .navbar .nav-links a:hover, .navbar button:hover { opacity: 0.85; }
+
+        .container { padding: 20px; max-width: 1200px; margin: 20px auto; background-color: white; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h2 { color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px; margin-bottom: 20px; font-size: 1.8em;}
+        h3 { font-size: 1.3em; margin-top: 25px; margin-bottom: 15px; color: #495057;}
+
+        .payroll-run-form, .payroll-history { margin-bottom: 30px; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px; background-color: #f9f9f9;}
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.9em; }
+        .form-group input[type="date"], .form-group textarea {
+            width: calc(100% - 22px); padding: 9px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.95em; box-sizing: border-box;
+        }
+        .form-group textarea { min-height: 60px; }
+        .run-payroll-btn { background-color: #28a745; color:white; padding: 10px 15px; border:none; border-radius:4px; cursor:pointer; font-size: 1em;}
+
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #dee2e6; padding: 8px 10px; text-align: left; font-size: 0.85em; vertical-align: middle; } /* Font dikecilkan sedikit untuk tabel padat */
+        th { background-color: #e9ecef; font-weight: bold; }
+        td.actions { white-space: nowrap; width: 1%; }
+        .actions button, .actions a { margin-right: 6px; padding: 5px 8px; font-size: 0.85em; border-radius: 4px; cursor: pointer; border: none; color: white; text-decoration: none; display: inline-block; }
+        .view-details-btn { background-color: #17a2b8; }
+        .export-pdf-btn { background-color: #6f42c1; }
+
+        .status-PENDING_APPROVAL { color: #ffc107; font-weight: bold; }
+        .status-APPROVED { color: #28a745; font-weight: bold; }
+        .status-REJECTED { color: #dc3545; font-weight: bold; }
+
+        .message { padding: 12px 15px; margin-bottom: 20px; border-radius: 4px; text-align: center; font-size: 0.95em; }
+        .success { background-color: #d1e7dd; color: #0f5132; border: 1px solid #badbcc; }
+        .error { background-color: #f8d7da; color: #842029; border: 1px solid #f5c2c7; }
+        .info { background-color: #cff4fc; color: #055160; border: 1px solid #b6effb; }
+
+        /* Modal untuk Detail Payslip Karyawan dalam Run */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.6); }
+        .modal-content { background-color: #fefefe; margin: 5% auto; padding: 20px; border: 1px solid #888; width: 90%; max-width: 900px; border-radius: 8px; }
+        .close-btn { color: #aaa; float: right; font-size: 28px; font-weight: bold; }
+        .close-btn:hover, .close-btn:focus { color: black; text-decoration: none; cursor: pointer; }
+        #payslipDetailsTable th, #payslipDetailsTable td { font-size: 0.8em; }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h1>Admin Panel</h1>
+        <div class="nav-links">
+            <span id="adminPayrollInfo" style="margin-right: 20px; font-size: 0.9em;"></span>
+            <a href="admin.html" title="Manajemen Pengguna">Pengguna</a>
+            <a href="settings.html" title="Pengaturan Absensi">Pengaturan Absensi</a>
+            <a href="allowance-types.html" title="Jenis Tunjangan">Jenis Tunjangan</a>
+            <a href="deduction-types.html" title="Jenis Potongan">Jenis Potongan</a>
+            <a href="admin-attendances.html" title="Manajemen Data Absensi">Data Absensi</a>
+            <button id="logoutButtonAdminPayroll">Logout</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>Manajemen Proses Penggajian (Payroll Run)</h2>
+        <div id="adminPayrollMessageArea" class="message" style="display: none;"></div>
+
+        <div class="payroll-run-form">
+            <h3>Mulai Proses Penggajian Baru</h3>
+            <form id="startPayrollRunForm">
+                <div class="form-group">
+                    <label for="periodStart">Tanggal Mulai Periode:</label>
+                    <input type="date" id="periodStart" name="periodStart" required>
+                </div>
+                <div class="form-group">
+                    <label for="periodEnd">Tanggal Akhir Periode:</label>
+                    <input type="date" id="periodEnd" name="periodEnd" required>
+                </div>
+                <div class="form-group">
+                    <label for="userIds">Proses untuk ID Karyawan Tertentu (Opsional, pisahkan dengan koma):</label>
+                    <textarea id="userIds" name="userIds" rows="2" placeholder="Kosongkan untuk memproses semua karyawan yang memenuhi syarat"></textarea>
+                </div>
+                <button type="submit" id="runPayrollBtn" class="run-payroll-btn">Jalankan Proses Penggajian</button>
+            </form>
+        </div>
+
+        <div class="payroll-history">
+            <h3>Histori Proses Penggajian</h3>
+            <div style="overflow-x:auto;">
+                <table id="payrollRunsTable">
+                    <thead>
+                        <tr>
+                            <th>ID Run</th>
+                            <th>Periode</th>
+                            <th>Tgl. Eksekusi</th>
+                            <th>Status</th>
+                            <th>Dieksekusi Oleh</th>
+                            <th>Diproses Yayasan Oleh</th>
+                            <th>Tgl. Proses Yayasan</th>
+                            <th>Ket. Penolakan</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="payrollRunsTableBody">
+                        <tr><td colspan="9" style="text-align:center; padding:20px;">Memuat histori...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="payrollRunDetailsModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" id="closePayrollRunDetailsModalBtn">&times;</span>
+            <h3 id="payrollRunDetailsModalTitle">Detail Slip Gaji Karyawan</h3>
+            <p><strong>Periode:</strong> <span id="modalRunPeriod"></span></p>
+            <p><strong>Status Run:</strong> <span id="modalRunStatus"></span></p>
+            <div style="overflow-x:auto;">
+                <table id="payslipDetailsTable">
+                    <thead>
+                        <tr>
+                            <th>Nama Karyawan</th>
+                            <th>Email</th>
+                            <th>Gaji Pokok</th>
+                            <th>Total Tunjangan</th>
+                            <th>Total Potongan</th>
+                            <th>Gaji Bersih</th>
+                            <th>Hari Hadir</th>
+                            <th>Hari Terlambat</th>
+                            <th>Hari Alpha</th>
+                            <th>Aksi Slip</th>
+                        </tr>
+                    </thead>
+                    <tbody id="payslipDetailsTableBody">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="auth_utils.js"></script> <script src="admin-payroll-runs.js"></script>
+</body>
+</html>

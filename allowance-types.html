@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Jenis Tunjangan</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; background-color: #f8f9fa; color: #333; font-size: 14px; }
+        .navbar { background-color: #343a40; padding: 10px 20px; color: white; display: flex; justify-content: space-between; align-items: center; }
+        .navbar h1 { margin: 0; font-size: 1.5em; }
+        .navbar .nav-links a, .navbar button {
+            color: white; text-decoration: none; padding: 8px 12px; border-radius: 4px;
+            background-color: #007bff; border: none; cursor: pointer; margin-left: 10px; font-size: 0.9em;
+        }
+        .navbar button#logoutButtonAllowanceTypes { background-color: #dc3545; }
+        .navbar .nav-links a:hover, .navbar button:hover { opacity: 0.85; }
+
+        .container { padding: 20px; max-width: 900px; margin: 20px auto; background-color: white; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h2 { color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px; margin-bottom: 20px; font-size: 1.8em;}
+        h3 { font-size: 1.3em; margin-top: 25px; margin-bottom: 15px; color: #495057;}
+
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #dee2e6; padding: 10px 12px; text-align: left; font-size: 0.95em; vertical-align: middle; }
+        th { background-color: #e9ecef; font-weight: bold; }
+        td.actions { white-space: nowrap; width: 1%; }
+        .actions button { margin-right: 6px; padding: 6px 10px; font-size: 0.88em; border-radius: 4px; cursor: pointer; border: none; color: white; }
+        .actions button:last-child { margin-right: 0; }
+        .edit-btn { background-color: #ffc107; color: #212529 !important; }
+        .delete-btn { background-color: #dc3545; }
+
+        .add-btn { background-color: #007bff; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; font-size: 1em; margin-bottom: 20px; }
+        .add-btn:hover { background-color: #0069d9; }
+
+        .message { padding: 12px 15px; margin-bottom: 20px; border-radius: 4px; text-align: center; font-size: 0.95em; }
+        .success { background-color: #d1e7dd; color: #0f5132; border: 1px solid #badbcc; }
+        .error { background-color: #f8d7da; color: #842029; border: 1px solid #f5c2c7; }
+        .info { background-color: #cff4fc; color: #055160; border: 1px solid #b6effb; }
+
+        /* Modal Styles */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.6); animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .modal-content { background-color: #fefefe; margin: 8% auto; padding: 25px 30px; border: 1px solid #888; width: 90%; max-width: 550px; border-radius: 8px; position: relative; box-shadow: 0 5px 15px rgba(0,0,0,0.3); animation: slideIn 0.3s ease-out; }
+        @keyframes slideIn { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .close-btn { color: #777; float: right; font-size: 30px; font-weight: bold; position: absolute; top: 10px; right: 20px; }
+        .close-btn:hover, .close-btn:focus { color: #333; text-decoration: none; cursor: pointer; }
+        .modal-content h3 { margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 15px; font-size: 1.4em; color: #343a40;}
+        .modal-content .form-group { margin-bottom: 15px; }
+        .modal-content label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.9em; color: #495057; }
+        .modal-content input[type="text"], .modal-content textarea {
+            width: calc(100% - 24px); padding: 10px 12px; border: 1px solid #ced4da; border-radius: 4px; font-size: 1em; box-sizing: border-box;
+        }
+        .modal-content textarea { min-height: 80px; resize: vertical; }
+        .modal-content input[type="checkbox"] { margin-right: 8px; vertical-align: middle; width: 16px; height: 16px;}
+        .modal-content .checkbox-label { font-weight: normal; font-size: 1em; vertical-align: middle;}
+        .modal-content input:focus, .modal-content textarea:focus { border-color: #80bdff; outline: 0; box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25); }
+        .modal-content button[type="submit"] { background-color: #28a745; color: white; padding: 10px 18px; border: none; border-radius: 4px; cursor: pointer; margin-top: 20px; font-size: 1em; float: right;}
+        .modal-content button[type="submit"]:hover { background-color: #218838; }
+        .modal-content button[type="submit"]:disabled { background-color: #a3d9b3; cursor: not-allowed; }
+        .modal-footer-message { margin-top: 50px; }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h1>Admin Panel</h1>
+        <div class="nav-links">
+            <span id="adminAllowanceInfo" style="margin-right: 20px; font-size: 0.9em;"></span>
+            <a href="admin.html" title="Kembali ke Manajemen Pengguna">Manajemen Pengguna</a>
+            <a href="settings.html" title="Pengaturan Absensi Global">Pengaturan Absensi</a>
+            <a href="deduction-types.html" title="Manajemen Jenis Potongan">Jenis Potongan</a> <button id="logoutButtonAllowanceTypes">Logout</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>Manajemen Jenis Tunjangan</h2>
+        <div id="allowanceTypesMessageArea" class="message" style="display: none;"></div>
+        <button id="showAddAllowanceTypeModalBtn" class="add-btn">+ Tambah Jenis Tunjangan</button>
+
+        <div class="list-container">
+            <h3>Daftar Jenis Tunjangan</h3>
+            <div style="overflow-x:auto;">
+                <table id="allowanceTypesTable">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Nama Tunjangan</th>
+                            <th>Deskripsi</th>
+                            <th>Jenis</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="allowanceTypesTableBody">
+                        <tr><td colspan="5" style="text-align:center; padding: 20px;">Memuat data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="allowanceTypeModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" id="closeAllowanceTypeModalBtn" title="Tutup">&times;</span>
+            <h3 id="allowanceTypeModalTitle">Tambah Jenis Tunjangan</h3>
+            <form id="allowanceTypeForm">
+                <input type="hidden" id="allowanceTypeId" name="allowanceTypeId">
+                <div class="form-group">
+                    <label for="allowanceTypeName">Nama Jenis Tunjangan:</label>
+                    <input type="text" id="allowanceTypeName" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="allowanceTypeDescription">Deskripsi (Opsional):</label>
+                    <textarea id="allowanceTypeDescription" name="description"></textarea>
+                </div>
+                <div class="form-group">
+                    <input type="checkbox" id="allowanceTypeIsFixed" name="isFixed" checked>
+                    <label for="allowanceTypeIsFixed" class="checkbox-label">Tunjangan Tetap (Fixed)</label>
+                    <small>Jika dicentang, tunjangan ini bersifat tetap per periode. Jika tidak, mungkin dihitung berdasarkan kehadiran atau aturan lain (logika perhitungan spesifik tidak diatur di sini, hanya sifatnya).</small>
+                </div>
+                <button type="submit" id="allowanceTypeFormSubmitBtn">Simpan</button>
+            </form>
+            <div id="allowanceTypeModalMessageArea" class="message modal-footer-message" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script src="auth_utils.js"></script> <script src="allowance-types.js"></script>
+</body>
+</html>

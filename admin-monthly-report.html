@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Laporan Absensi Bulanan</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; margin: 0; background-color: #f0f2f5; color: #1c1e21; font-size: 14px; line-height: 1.5; }
+        .navbar { background-color: #343a40; padding: 12px 25px; color: white; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .navbar h1 { margin: 0; font-size: 1.6em; font-weight: 600;}
+        .navbar .nav-links a, .navbar button {
+            color: white; text-decoration: none; padding: 8px 15px; border-radius: 5px;
+            background-color: #007bff; border: none; cursor: pointer; margin-left: 12px; font-size: 0.9em; font-weight: 500;
+            transition: background-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .navbar button#logoutButtonAdminReport { background-color: #dc3545; }
+        .navbar .nav-links a:hover, .navbar button:hover { opacity: 0.9; box-shadow: 0 0 5px rgba(255,255,255,0.3); }
+
+        .container { padding: 25px; max-width: 1140px; margin: 25px auto; background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        h2 { color: #1c1e21; border-bottom: 1px solid #dee2e6; padding-bottom: 12px; margin-bottom: 25px; font-size: 1.9em; font-weight: 600;}
+        h3 { font-size: 1.4em; margin-top: 30px; margin-bottom: 18px; color: #343a40; font-weight: 500;}
+        h4 { font-size: 1.2em; margin-bottom: 12px; color: #007bff; font-weight: 500;}
+
+        .filters { display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 30px; padding: 20px; background-color: #f8f9fa; border: 1px solid #e9ecef; border-radius: 6px; align-items: flex-end; }
+        .filters .filter-group { display: flex; flex-direction: column; flex-grow: 1; min-width: 150px; }
+        .filters label { margin-bottom: 6px; font-size: 0.9em; color: #495057; font-weight: 500; }
+        .filters input[type="number"], .filters select {
+            padding: 10px 12px; border: 1px solid #ced4da; border-radius: 4px; font-size: 0.95em; box-sizing: border-box;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .filters input:focus, .filters select:focus { border-color: #80bdff; outline: 0; box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25); }
+        .filters button { padding: 10px 20px; font-size: 0.95em; font-weight: 500; background-color: #007bff; color:white; border:none; border-radius: 4px; cursor:pointer; }
+        .filters button:hover { background-color: #0069d9; }
+        
+        .report-info-header { margin-bottom: 25px; padding: 15px; background-color: #eef7ff; border-left: 4px solid #007bff; border-radius: 4px; font-size:1em; }
+        .report-info-header p { margin: 6px 0; }
+
+        .user-report-card {
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            margin-bottom: 25px;
+            background-color: #fff;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .user-report-card-header {
+            background-color: #f8f9fa;
+            padding: 12px 18px;
+            border-bottom: 1px solid #dee2e6;
+            border-top-left-radius: 6px;
+            border-top-right-radius: 6px;
+        }
+        .user-report-card-header h4 { margin: 0; color: #343a40; font-size: 1.15em;}
+        .user-report-card-body { padding: 18px; }
+
+        .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px; margin-bottom: 15px; }
+        .summary-item { background-color: #f8f9fa; padding: 10px; border-radius: 4px; text-align: center; }
+        .summary-item .label { font-size: 0.85em; color: #6c757d; display: block; margin-bottom: 4px; }
+        .summary-item .value { font-size: 1.3em; font-weight: 600; color: #1c1e21; }
+        .summary-item .value.alpha { color: #dc3545; }
+        .summary-item .value.terlambat { color: #ffc107; }
+        .summary-item .value.hadir { color: #28a745; }
+
+        .view-daily-detail-btn {
+            background-color: #6c757d; color: white; padding: 8px 15px; font-size: 0.9em;
+            border:none; border-radius:4px; cursor:pointer; display: inline-block; margin-top:10px;
+        }
+        .view-daily-detail-btn:hover { background-color: #5a6268; }
+
+
+        table.data-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        .data-table th, .data-table td { border: 1px solid #e0e0e0; padding: 10px; text-align: left; font-size: 0.9em; }
+        .data-table th { background-color: #f1f3f5; font-weight: 500; color: #495057; }
+        
+        .message { padding: 12px 15px; margin-bottom: 20px; border-radius: 4px; text-align: center; font-size: 0.95em; }
+        .success { background-color: #d1e7dd; color: #0f5132; border: 1px solid #badbcc; }
+        .error { background-color: #f8d7da; color: #842029; border: 1px solid #f5c2c7; }
+        .info { background-color: #cff4fc; color: #055160; border: 1px solid #b6effb; }
+
+        /* Modal Styles (konsisten) */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.6); animation: fadeInModal 0.3s; }
+        .modal-content { background-color: #fff; margin: 5% auto; padding: 25px; border-radius: 8px; width: 90%; max-width: 1000px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); animation: scaleUpModal 0.3s; position: relative; }
+        .close-btn { color: #aaa; position: absolute; top: 15px; right: 20px; font-size: 30px; font-weight: bold; line-height: 1; }
+        .close-btn:hover, .close-btn:focus { color: #333; text-decoration: none; cursor: pointer; }
+        .modal-content h3 { margin-top: 0; padding-bottom: 15px; border-bottom: 1px solid #eee; font-size: 1.5em; font-weight: 500; color: #333;}
+        @keyframes fadeInModal { from {opacity: 0} to {opacity: 1} }
+        @keyframes scaleUpModal { from {transform: scale(0.95); opacity: 0.5;} to {transform: scale(1); opacity: 1;} }
+        .daily-detail-table th, .daily-detail-table td { font-size: 0.88em; }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h1>Admin Panel</h1>
+        <div class="nav-links">
+            <span id="adminReportInfo" style="margin-right: 20px; font-size: 0.9em;"></span>
+            <a href="admin.html" title="Manajemen Pengguna">Pengguna</a>
+            <a href="settings.html" title="Pengaturan Absensi">Pengaturan Absensi</a>
+            <a href="allowance-types.html" title="Jenis Tunjangan">Jenis Tunjangan</a>
+            <a href="deduction-types.html" title="Jenis Potongan">Jenis Potongan</a>
+            <a href="admin-attendances.html" title="Manajemen Data Absensi">Data Absensi</a>
+            <a href="admin-payroll-runs.html" title="Manajemen Proses Penggajian">Penggajian</a>
+            <button id="logoutButtonAdminReport">Logout</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>Laporan Absensi Bulanan Karyawan</h2>
+        <div id="adminReportMessageArea" class="message" style="display: none;"></div>
+
+        <div class="filters">
+            <div class="filter-group">
+                <label for="filterYear">Tahun:</label>
+                <input type="number" id="filterYear" min="2020" max="2099" placeholder="YYYY">
+            </div>
+            <div class="filter-group">
+                <label for="filterMonth">Bulan:</label>
+                <select id="filterMonth">
+                    <option value="">-- Pilih Bulan --</option>
+                    </select>
+            </div>
+            <div class="filter-group">
+                <button id="generateReportBtn">Tampilkan Laporan</button>
+            </div>
+        </div>
+
+        <div id="reportOutputArea" style="display:none;">
+            <div class="report-info-header">
+                <p><strong>Laporan untuk Periode:</strong> <span id="reportPeriod"></span></p>
+                <p><strong>Tanggal Laporan Dibuat:</strong> <span id="reportGeneratedDate"></span></p>
+            </div>
+            <div id="reportDataContainer">
+                </div>
+        </div>
+    </div>
+
+    <div id="dailyDetailModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" id="closeDailyDetailModalBtn">&times;</span>
+            <h3 id="dailyDetailModalTitle">Detail Absensi Harian untuk Karyawan</h3>
+            <div style="overflow-x:auto; max-height: 70vh;"> <table id="dailyDetailTable" class="data-table daily-detail-table">
+                    <thead>
+                        <tr>
+                            <th>Tanggal</th>
+                            <th>Status</th>
+                            <th>Clock In</th>
+                            <th>Clock Out</th>
+                            <th>Lat/Lon In</th>
+                            <th>Lat/Lon Out</th>
+                            <th>Catatan</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dailyDetailTableBody">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="auth_utils.js"></script>
+    <script src="admin-monthly-report.js"></script>
+</body>
+</html>

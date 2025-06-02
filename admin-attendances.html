@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Manajemen Absensi Karyawan</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; background-color: #f8f9fa; color: #333; font-size: 14px; }
+        .navbar { background-color: #343a40; padding: 10px 20px; color: white; display: flex; justify-content: space-between; align-items: center; }
+        .navbar h1 { margin: 0; font-size: 1.5em; }
+        .navbar .nav-links a, .navbar button {
+            color: white; text-decoration: none; padding: 8px 12px; border-radius: 4px;
+            background-color: #007bff; border: none; cursor: pointer; margin-left: 10px; font-size: 0.9em;
+        }
+        .navbar button#logoutButtonAdminAttendances { background-color: #dc3545; }
+        .navbar .nav-links a:hover, .navbar button:hover { opacity: 0.85; }
+
+        .container { padding: 20px; max-width: 1200px; margin: 20px auto; background-color: white; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h2 { color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px; margin-bottom: 20px; font-size: 1.8em;}
+        h3 { font-size: 1.3em; margin-top: 25px; margin-bottom: 15px; color: #495057;}
+
+        .filters { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 20px; padding: 15px; background-color: #f1f3f5; border-radius: 5px; }
+        .filters .filter-group { display: flex; flex-direction: column; }
+        .filters label { margin-bottom: 5px; font-size: 0.85em; color: #495057; }
+        .filters input[type="date"], .filters select, .filters input[type="text"] {
+            padding: 8px 10px; border: 1px solid #ced4da; border-radius: 4px; font-size: 0.9em;
+        }
+        .filters button { padding: 8px 15px; font-size: 0.9em; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #dee2e6; padding: 8px 10px; text-align: left; font-size: 0.88em; vertical-align: middle; }
+        th { background-color: #e9ecef; font-weight: bold; }
+        td.actions { white-space: nowrap; width: 1%; }
+        .actions button { margin-right: 6px; padding: 5px 8px; font-size: 0.85em; border-radius: 4px; cursor: pointer; border: none; color: white; }
+        .change-status-btn { background-color: #ffc107; color: #212529 !important; }
+
+        .pagination { margin-top: 20px; text-align: center; }
+        .pagination button { padding: 8px 12px; margin: 0 5px; background-color: #007bff; color:white; border:none; border-radius:4px; cursor:pointer; }
+        .pagination button:disabled { background-color: #e9ecef; color:#6c757d; cursor:not-allowed; }
+        .pagination span { margin: 0 10px; font-size: 0.9em; }
+
+        .message { padding: 12px 15px; margin-bottom: 20px; border-radius: 4px; text-align: center; font-size: 0.95em; }
+        .success { background-color: #d1e7dd; color: #0f5132; border: 1px solid #badbcc; }
+        .error { background-color: #f8d7da; color: #842029; border: 1px solid #f5c2c7; }
+        .info { background-color: #cff4fc; color: #055160; border: 1px solid #b6effb; }
+
+        /* Modal Styles (konsisten) */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.6); animation: fadeIn 0.3s ease-out; }
+        .modal-content { background-color: #fefefe; margin: 8% auto; padding: 25px 30px; border: 1px solid #888; width: 90%; max-width: 550px; border-radius: 8px; position: relative; box-shadow: 0 5px 15px rgba(0,0,0,0.3); animation: slideIn 0.3s ease-out; }
+        .close-btn { color: #777; float: right; font-size: 30px; font-weight: bold; position: absolute; top: 10px; right: 20px; }
+        .close-btn:hover, .close-btn:focus { color: #333; text-decoration: none; cursor: pointer; }
+        .modal-content h3 { margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 15px; font-size: 1.4em; color: #343a40;}
+        .modal-content .form-group { margin-bottom: 15px; }
+        .modal-content label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.9em; color: #495057; }
+        .modal-content input[type="text"], .modal-content input[type="date"],
+        .modal-content textarea, .modal-content select {
+            width: calc(100% - 24px); padding: 10px 12px; border: 1px solid #ced4da; border-radius: 4px; font-size: 1em; box-sizing: border-box;
+        }
+        .modal-content textarea { min-height: 70px; resize: vertical; }
+        .modal-content input:focus, .modal-content textarea:focus, .modal-content select:focus { border-color: #80bdff; outline: 0; box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25); }
+        .modal-content button[type="submit"] { background-color: #28a745; color: white; padding: 10px 18px; border: none; border-radius: 4px; cursor: pointer; margin-top: 20px; font-size: 1em; float: right;}
+        .modal-content button[type="submit"]:hover { background-color: #218838; }
+        .modal-content button[type="submit"]:disabled { background-color: #a3d9b3; cursor: not-allowed; }
+        .modal-footer-message { margin-top: 50px; }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h1>Admin Panel</h1>
+        <div class="nav-links">
+            <span id="adminAttendancesInfo" style="margin-right: 20px; font-size: 0.9em;"></span>
+            <a href="admin.html" title="Manajemen Pengguna">Pengguna</a>
+            <a href="settings.html" title="Pengaturan Absensi Global">Pengaturan Absensi</a>
+            <a href="allowance-types.html" title="Manajemen Jenis Tunjangan">Jenis Tunjangan</a>
+            <a href="deduction-types.html" title="Manajemen Jenis Potongan">Jenis Potongan</a>
+            <button id="logoutButtonAdminAttendances">Logout</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>Manajemen Data Absensi Karyawan</h2>
+        <div id="adminAttendancesMessageArea" class="message" style="display: none;"></div>
+
+        <div class="filters">
+            <div class="filter-group">
+                <label for="filterUser">Karyawan:</label>
+                <select id="filterUser">
+                    <option value="">Semua Karyawan</option>
+                    </select>
+            </div>
+            <div class="filter-group">
+                <label for="filterStartDate">Dari Tanggal:</label>
+                <input type="date" id="filterStartDate">
+            </div>
+            <div class="filter-group">
+                <label for="filterEndDate">Sampai Tanggal:</label>
+                <input type="date" id="filterEndDate">
+            </div>
+            <div class="filter-group">
+                <label for="filterStatus">Status Absensi:</label>
+                <select id="filterStatus">
+                    <option value="">Semua Status</option>
+                    </select>
+            </div>
+            <div class="filter-group" style="align-self: flex-end;">
+                <button id="applyFiltersBtn" class="add-btn" style="margin-bottom:0; margin-right: 5px;">Terapkan Filter</button>
+                <button id="resetFiltersBtn" style="background-color: #6c757d; margin-bottom:0;">Reset Filter</button>
+            </div>
+        </div>
+
+        <div class="list-container">
+            <h3>Daftar Catatan Absensi</h3>
+            <div style="overflow-x:auto;">
+                <table id="adminAttendancesTable">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Tanggal</th>
+                            <th>Nama Karyawan</th>
+                            <th>Email</th>
+                            <th>Clock In</th>
+                            <th>Clock Out</th>
+                            <th>Status</th>
+                            <th>Catatan</th>
+                            <th>Lat/Lon In</th>
+                            <th>Lat/Lon Out</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminAttendancesTableBody">
+                        <tr><td colspan="11" style="text-align:center; padding: 20px;">Memuat data absensi...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="pagination" id="paginationControls">
+                <button id="prevPageBtn" disabled>&laquo; Sebelumnya</button>
+                <span id="pageInfo">Halaman - dari -</span>
+                <button id="nextPageBtn" disabled>Berikutnya &raquo;</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="manualAttendanceStatusModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" id="closeManualStatusModalBtn" title="Tutup">&times;</span>
+            <h3 id="manualStatusModalTitle">Ubah Status Absensi Manual</h3>
+            <form id="manualAttendanceStatusForm">
+                <input type="hidden" id="manualStatusRecordId"> <div class="form-group">
+                    <label>Karyawan:</label>
+                    <p id="manualStatusUserName" style="font-size:1em; margin-top:0;"></p>
+                    <input type="hidden" id="manualStatusUserId" name="userId">
+                </div>
+                <div class="form-group">
+                    <label for="manualStatusDate">Tanggal:</label>
+                    <input type="date" id="manualStatusDate" name="date" required>
+                </div>
+                <div class="form-group">
+                    <label for="manualStatusNewStatus">Status Baru:</label>
+                    <select id="manualStatusNewStatus" name="status" required>
+                        </select>
+                </div>
+                <div class="form-group">
+                    <label for="manualStatusNotes">Catatan Admin (Opsional):</label>
+                    <textarea id="manualStatusNotes" name="notes" placeholder="Contoh: Izin sakit berdasarkan surat dokter"></textarea>
+                </div>
+                <button type="submit" id="manualStatusSubmitBtn">Simpan Status</button>
+            </form>
+            <div id="manualStatusModalMessageArea" class="message modal-footer-message" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script src="auth_utils.js"></script> <script src="admin-attendances.js"></script>
+</body>
+</html>

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Pengaturan Absensi</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; background-color: #f8f9fa; color: #333; font-size: 14px; }
+        .navbar { background-color: #343a40; padding: 10px 20px; color: white; display: flex; justify-content: space-between; align-items: center; }
+        .navbar h1 { margin: 0; font-size: 1.5em; }
+        .navbar .nav-links a, .navbar button {
+            color: white;
+            text-decoration: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            background-color: #007bff;
+            border: none;
+            cursor: pointer;
+            margin-left: 10px;
+            font-size: 0.9em;
+        }
+        .navbar button#logoutButtonSettings { background-color: #dc3545; }
+        .navbar .nav-links a:hover, .navbar button:hover { opacity: 0.85; }
+
+        .container { padding: 25px 30px; max-width: 750px; margin: 20px auto; background-color: white; border-radius: 8px; box-shadow: 0 2px 15px rgba(0,0,0,0.08); }
+        h2 { color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px; margin-bottom: 25px; font-size: 1.8em;}
+        
+        fieldset {
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+        fieldset legend {
+            font-size: 1.15em;
+            font-weight: bold;
+            color: #007bff;
+            padding: 0 10px;
+        }
+
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: bold; font-size: 0.95em; color: #495057;}
+        .form-group input[type="number"],
+        .form-group input[type="text"] {
+            width: calc(100% - 24px); /* padding kiri kanan */
+            padding: 10px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 1em;
+            box-sizing: border-box;
+        }
+        .form-group input[type="checkbox"] { margin-right: 8px; vertical-align: middle; width: 16px; height: 16px;}
+        .form-group .checkbox-label { font-weight: normal; font-size: 1em; vertical-align: middle;}
+
+        .form-group .inline-inputs { display: flex; align-items: center; gap: 10px; }
+        .form-group .inline-inputs label { margin-bottom: 0; font-weight: normal; font-size: 0.95em;}
+        .form-group .inline-inputs input[type="number"] { width: 80px; /* Lebar disesuaikan */ }
+        
+        .form-group small { display: block; font-size: 0.85em; color: #6c757d; margin-top: 5px; }
+        
+        .location-settings-fields { /* Menggantikan .location-settings */
+            border-top: 1px dashed #ced4da;
+            padding-top: 20px;
+            margin-top: 20px;
+        }
+        
+        button[type="submit"] {
+            background-color: #28a745;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1.05em;
+            font-weight: bold;
+            transition: background-color 0.2s ease;
+        }
+        button[type="submit"]:hover { background-color: #218838; }
+        button[type="submit"]:disabled { background-color: #a3d9b3; cursor: not-allowed; }
+        
+        .message { padding: 12px 15px; margin-bottom: 20px; border-radius: 4px; text-align: center; font-size: 0.95em; }
+        .success { background-color: #d1e7dd; color: #0f5132; border: 1px solid #badbcc; }
+        .error { background-color: #f8d7da; color: #842029; border: 1px solid #f5c2c7; }
+        .info { background-color: #cff4fc; color: #055160; border: 1px solid #b6effb; }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h1>Admin Panel</h1>
+        <div class="nav-links">
+            <span id="adminSettingsInfo" style="margin-right: 20px; font-size: 0.9em;"></span>
+            <a href="admin.html" title="Kembali ke Manajemen Pengguna">Manajemen Pengguna</a>
+            <button id="logoutButtonSettings">Logout</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>Pengaturan Absensi Global</h2>
+        <div id="settingsMessageArea" class="message" style="display: none;"></div>
+
+        <form id="attendanceSettingsForm">
+            <fieldset>
+                <legend>Waktu Kerja Standar</legend>
+                <div class="form-group">
+                    <label>Jam Mulai Kerja:</label>
+                    <div class="inline-inputs">
+                        <label for="workStartTimeHour">Jam (0-23):</label>
+                        <input type="number" id="workStartTimeHour" name="workStartTimeHour" min="0" max="23" required placeholder="HH">
+                        <label for="workStartTimeMinute">Menit (0-59):</label>
+                        <input type="number" id="workStartTimeMinute" name="workStartTimeMinute" min="0" max="59" required placeholder="MM">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="lateToleranceMinutes">Toleransi Keterlambatan (Menit):</label>
+                    <input type="number" id="lateToleranceMinutes" name="lateToleranceMinutes" min="0" required placeholder="e.g., 15">
+                </div>
+                <div class="form-group">
+                    <label>Jam Selesai Kerja:</label>
+                    <div class="inline-inputs">
+                        <label for="workEndTimeHour">Jam (0-23):</label>
+                        <input type="number" id="workEndTimeHour" name="workEndTimeHour" min="0" max="23" required placeholder="HH">
+                        <label for="workEndTimeMinute">Menit (0-59):</label>
+                        <input type="number" id="workEndTimeMinute" name="workEndTimeMinute" min="0" max="59" required placeholder="MM">
+                    </div>
+                </div>
+            </fieldset>
+
+            <fieldset>
+                <legend>Pengaturan Kunci Lokasi</legend>
+                <div class="form-group">
+                    <input type="checkbox" id="isLocationLockActive" name="isLocationLockActive">
+                    <label for="isLocationLockActive" class="checkbox-label">Aktifkan Pembatasan Lokasi untuk Absensi</label>
+                </div>
+                <div id="locationFieldsContainer" class="location-settings-fields" style="display: none;"> <div class="form-group">
+                        <label for="targetLatitude">Latitude Titik Pusat Lokasi:</label>
+                        <input type="text" id="targetLatitude" name="targetLatitude" placeholder="Contoh: -3.316694">
+                        <small>Format desimal (misal: -3.316694). Wajib diisi jika kunci lokasi aktif.</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="targetLongitude">Longitude Titik Pusat Lokasi:</label>
+                        <input type="text" id="targetLongitude" name="targetLongitude" placeholder="Contoh: 114.590111">
+                        <small>Format desimal (misal: 114.590111). Wajib diisi jika kunci lokasi aktif.</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="allowedRadiusMeters">Radius Toleransi (dalam Meter):</label>
+                        <input type="number" id="allowedRadiusMeters" name="allowedRadiusMeters" min="1" placeholder="e.g., 100">
+                        <small>Jarak maksimal dari titik pusat lokasi (harus > 0). Wajib diisi jika kunci lokasi aktif.</small>
+                    </div>
+                </div>
+            </fieldset>
+
+            <div style="text-align: right; margin-top: 30px;">
+                <button type="submit" id="saveSettingsBtn">Simpan Pengaturan</button>
+            </div>
+        </form>
+    </div>
+
+    <script src="auth_utils.js"></script> <script src="settings.js"></script>
+</body>
+</html>

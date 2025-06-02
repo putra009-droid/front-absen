@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Absensi</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5;
+            color: #1c1e21;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        header {
+            background-color: #007bff;
+            color: white;
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        header h1 {
+            margin: 0;
+            font-size: 1.7em; /* Sedikit lebih besar */
+            font-weight: 600;
+        }
+        #userInfo {
+            font-size: 0.95em;
+            font-weight: 500;
+            margin-right: auto; /* Mendorong info user ke kiri, menyisakan ruang untuk aksi */
+            padding-left: 20px; /* Jarak dari judul */
+        }
+        .header-actions {
+            display: flex;
+            align-items: center;
+        }
+        .header-actions a, .header-actions button {
+            color: white;
+            text-decoration: none;
+            padding: 9px 14px;
+            border-radius: 5px; /* Border radius sedikit lebih besar */
+            background-color: #6c757d; /* Warna netral untuk link navigasi umum */
+            border: none;
+            cursor: pointer;
+            margin-left: 12px; /* Jarak antar item */
+            font-size: 0.9em;
+            font-weight: 500;
+            transition: background-color 0.2s ease, opacity 0.2s ease;
+            white-space: nowrap; /* Mencegah teks wrap */
+        }
+        .header-actions button#logoutButtonUser { background-color: #dc3545; }
+        .header-actions a:hover, .header-actions button:hover { opacity: 0.85; }
+
+        .admin-link { background-color: #17a2b8 !important; /* Biru muda untuk admin */ }
+        .admin-link:hover { background-color: #138496 !important; }
+        .yayasan-link { background-color: #ffc107 !important; color: #212529 !important; /* Kuning untuk yayasan */ }
+        .yayasan-link:hover { background-color: #e0a800 !important; }
+        .karyawan-link { background-color: #20c997 !important; } /* Hijau mint untuk link karyawan */
+        .karyawan-link:hover { background-color: #1baa80 !important; }
+
+
+        .container {
+            padding: 25px;
+            max-width: 900px; /* Sedikit lebih lebar untuk konten */
+            margin: 25px auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        .container > h2 { /* Judul utama di kontainer */
+            font-size: 1.9em; /* Lebih besar */
+            color: #333;
+            margin-top: 0;
+            border-bottom: 1px solid #dee2e6; /* Garis bawah lebih halus */
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+            font-weight: 600;
+        }
+        
+        .dashboard-section {
+            background-color: #ffffff;
+            padding: 20px 25px; /* Padding disesuaikan */
+            margin-bottom: 25px;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+        }
+        .dashboard-section h3 {
+            font-size: 1.25em; /* Ukuran subjudul */
+            color: #007bff;
+            margin-top: 0;
+            margin-bottom: 18px; /* Jarak bawah subjudul */
+            padding-bottom: 10px;
+            border-bottom: 1px solid #f0f2f5;
+        }
+        .dashboard-section p {
+            line-height: 1.65;
+            font-size: 1em; /* Ukuran font paragraf standar */
+            color: #495057;
+        }
+
+        #attendanceStatusArea p { font-size: 1.05em; } /* Ukuran font status absensi */
+        #currentAttendanceStatus { font-weight: 600; /* Lebih tebal */ }
+
+        .action-buttons button {
+            padding: 10px 18px;
+            font-size: 0.95em; /* Ukuran font tombol aksi */
+            margin-right: 12px;
+            margin-top: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            color: white;
+            font-weight: 500;
+            transition: background-color 0.2s ease;
+        }
+        .action-buttons button:last-child { margin-right: 0; }
+
+        #clockInBtn { background-color: #28a745; }
+        #clockInBtn:hover { background-color: #218838; }
+        #clockOutBtn { background-color: #ffc107; color: #212529; }
+        #clockOutBtn:hover { background-color: #e0a800; }
+        #requestLeaveBtn { background-color: #17a2b8; }
+        #requestLeaveBtn:hover { background-color: #138496; }
+
+
+        .message { padding: 12px 15px; margin-top: 20px; border-radius: 4px; text-align: center; font-size: 0.95em; }
+        .error { background-color: #f8d7da; color: #842029; border: 1px solid #f5c2c7; }
+        .info { background-color: #cff4fc; color: #055160; border: 1px solid #b6effb; }
+        .success { background-color: #d1e7dd; color: #0f5132; border: 1px solid #badbcc; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Dashboard</h1>
+        <div id="userInfo">Memuat info pengguna...</div>
+        <div class="header-actions">
+            <span id="adminAccessArea" style="display:none;">
+                <a href="admin.html" class="admin-link" title="Masuk ke Panel Administrasi Utama">Panel Admin</a>
+            </span>
+
+            <span id="yayasanAccessArea" style="display:none;">
+                <a href="yayasan-leave-requests.html" class="yayasan-link" title="Persetujuan Izin Karyawan">Persetujuan Izin</a>
+                <a href="yayasan-payroll-approval.html" class="yayasan-link" title="Persetujuan Proses Penggajian">Persetujuan Gaji</a>
+                </span>
+            <button id="logoutButtonUser">Logout</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <h2 id="welcomeMessage">Selamat Datang!</h2>
+        
+        <div id="userFeatures" class="dashboard-section">
+            <h3>Absensi Anda</h3>
+            <div id="attendanceStatusArea">
+                <p id="currentAttendanceStatus">Memuat status absensi hari ini...</p>
+            </div>
+            <div class="action-buttons" style="margin-top: 15px;">
+                <button id="clockInBtn" style="display:none;">Clock In</button>
+                <button id="clockOutBtn" style="display:none;">Clock Out</button>
+                <button id="requestLeaveBtn">Ajukan Izin/Cuti</button>
+            </div>
+        </div>
+
+        <div id="payslipAccessArea" class="dashboard-section" style="display:none;">
+             <h3>Slip Gaji Saya</h3>
+             <p><a href="my-payslips.html" class="karyawan-link" style="padding: 8px 12px;">Lihat Semua Slip Gaji</a></p>
+             </div>
+
+        <div id="messageAreaDashboard" class="message" style="display: none;"></div>
+    </div>
+
+    <script src="auth_utils.js"></script> <script src="dashboard.js"></script>
+</body>
+</html>
