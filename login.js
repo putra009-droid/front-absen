@@ -5,6 +5,21 @@ document.addEventListener('DOMContentLoaded', function () {
     const passwordInput = document.getElementById('password');
     const loginButton = document.getElementById('loginButton');
     const messageArea = document.getElementById('messageArea');
+    
+    // --- Tambahan untuk toggle password ---
+    const togglePasswordButton = document.getElementById('togglePassword');
+
+    if (togglePasswordButton && passwordInput) {
+        togglePasswordButton.addEventListener('click', function () {
+            // Toggle tipe input antara password dan text
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            
+            // Ganti ikon mata (opsional, contoh sederhana dengan teks)
+            this.textContent = type === 'password' ? '👁️' : '🙈'; // Atau ikon lain
+        });
+    }
+    // --- Akhir tambahan ---
 
     loginForm.addEventListener('submit', async function (event) {
         event.preventDefault();

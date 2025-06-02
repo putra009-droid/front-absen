@@ -9,7 +9,34 @@
         .container { background-color: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
         h2 { text-align: center; color: #333; margin-bottom: 20px; }
         label { display: block; margin-bottom: 5px; color: #555; font-weight: bold; }
-        input[type="email"], input[type="password"] { width: calc(100% - 22px); padding: 10px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; }
+        input[type="email"] { width: calc(100% - 22px); padding: 10px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; }
+        
+        /* Penyesuaian untuk input password dan ikon mata */
+        .password-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px; /* Sesuaikan dengan margin-bottom input email */
+        }
+        .password-container input[type="password"],
+        .password-container input[type="text"] { /* Tambahkan tipe text untuk saat password terlihat */
+            width: calc(100% - 22px); /* Sesuaikan dengan input email */
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            flex-grow: 1; /* Agar input mengisi ruang */
+        }
+        .password-container .toggle-password {
+            position: absolute;
+            right: 10px; /* Atur posisi ikon mata */
+            cursor: pointer;
+            user-select: none; /* Mencegah teks ikon terseleksi */
+            font-size: 18px; /* Ukuran ikon mata */
+            color: #777;
+        }
+        /* Akhir penyesuaian */
+
         button { width: 100%; padding: 12px; background-color: #007bff; color: white; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; transition: background-color 0.3s; }
         button:hover { background-color: #0056b3; }
         button:disabled { background-color: #cccccc; cursor: not-allowed; }
@@ -28,7 +55,10 @@
             </div>
             <div>
                 <label for="password">Password:</label>
-                <input type="password" id="password" name="password" required>
+                <div class="password-container">
+                    <input type="password" id="password" name="password" required>
+                    <span id="togglePassword" class="toggle-password">👁️</span> 
+                    </div>
             </div>
             <button type="submit" id="loginButton">Login</button>
         </form>
